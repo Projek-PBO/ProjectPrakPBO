@@ -5,6 +5,19 @@
  */
 package View;
 
+import Controllers.DataBukuController2;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.Date;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+
+
 /**
  *
  * @author IDEAPAD GAMING
@@ -14,11 +27,48 @@ public class DataBukuView extends javax.swing.JPanel {
     /**
      * Creates new form DataBukuView
      */
+//    Date currentDate = new Date();
+    Connection koneksi;
+    Statement kalimat;
+    LocalDate today = LocalDate.now();
+
+    private final String dbUrl = "jdbc:mysql://localhost/perpustakaan";
+    private final String user = "root";
+    private final String pass = "";
+    String select = "SELECT * FROM `buku`";
     public DataBukuView() {
         initComponents();
+        
+//        controller.isiTabel();
         btnhapus.setVisible(false);
         btnbatal1.setVisible(false);
+        loadData();
     }
+    
+    public void loadData() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select);
+        DefaultTableModel model = (DefaultTableModel) tabel_databuku.getModel();
+        model.setRowCount(0);
+        while (resultSet.next()) {
+            model.addRow(new Object[]{
+                resultSet.getString("id_buku"),
+                resultSet.getString("judul"),
+                resultSet.getString("pengarang"),
+                resultSet.getString("penerbit"),
+                resultSet.getString("tahun_terbit"),
+                resultSet.getString("ISBN"),
+                resultSet.getInt("jumlah"),
+                resultSet.getString("lokasi"),
+                resultSet.getString("tanggal")
+            });
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -142,6 +192,11 @@ public class DataBukuView extends javax.swing.JPanel {
         txt_search.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         txt_search.setText("Search");
         txt_search.setBorder(null);
+        txt_search.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_searchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout Panel_bukuLayout = new javax.swing.GroupLayout(Panel_buku);
         Panel_buku.setLayout(Panel_bukuLayout);
@@ -151,23 +206,24 @@ public class DataBukuView extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(Panel_bukuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jSeparator1)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, Panel_bukuLayout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, Panel_bukuLayout.createSequentialGroup()
                         .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnhapus, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnbatal1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 41, Short.MAX_VALUE)
+                        .addGap(18, 18, Short.MAX_VALUE)
                         .addGroup(Panel_bukuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, Panel_bukuLayout.createSequentialGroup()
                                 .addComponent(txt_search)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel12))
-                            .addComponent(jSeparator3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jSeparator3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, Panel_bukuLayout.createSequentialGroup()
+                        .addGroup(Panel_bukuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 670, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         Panel_bukuLayout.setVerticalGroup(
@@ -177,7 +233,7 @@ public class DataBukuView extends javax.swing.JPanel {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
                 .addGroup(Panel_bukuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(Panel_bukuLayout.createSequentialGroup()
@@ -189,7 +245,7 @@ public class DataBukuView extends javax.swing.JPanel {
                         .addComponent(btnbatal1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txt_search, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 585, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -206,6 +262,11 @@ public class DataBukuView extends javax.swing.JPanel {
         btnsimpan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/simpan.png"))); // NOI18N
         btnsimpan.setText("SIMPAN");
         btnsimpan.setBorder(null);
+        btnsimpan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnsimpanMouseClicked(evt);
+            }
+        });
         btnsimpan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnsimpanActionPerformed(evt);
@@ -416,6 +477,16 @@ public class DataBukuView extends javax.swing.JPanel {
 
     private void btn_tambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambahActionPerformed
        Main_Panel.removeAll();
+       int selectedRow = tabel_databuku.getSelectedRow();
+        if (selectedRow >= 0) {
+       txt_judulbuku.setText(tabel_databuku.getValueAt(selectedRow, 1).toString());
+        txt_pengarang.setText(tabel_databuku.getValueAt(selectedRow, 2).toString());
+        txt_penerbit.setText(tabel_databuku.getValueAt(selectedRow, 3).toString());
+        txt_tahunterbit.setText(tabel_databuku.getValueAt(selectedRow, 4).toString());
+        txt_isbn.setText(tabel_databuku.getValueAt(selectedRow, 5).toString());
+        jSpinner1.setValue(Integer.parseInt(tabel_databuku.getValueAt(selectedRow, 6).toString()));
+        jComboBox1.setSelectedItem(tabel_databuku.getValueAt(selectedRow, 7).toString());
+        }
        Main_Panel.add(Tambah_buku);
        Main_Panel.repaint();
        Main_Panel.revalidate();
@@ -423,6 +494,19 @@ public class DataBukuView extends javax.swing.JPanel {
 
     private void btnhapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnhapusActionPerformed
         // TODO add your handling code here:
+        int selectedRow = tabel_databuku.getSelectedRow();
+        if (selectedRow >= 0) {
+        int id = (Integer) tabel_databuku.getValueAt(selectedRow, 0); // Assuming ISBN is the unique identifier
+        try {
+            koneksi = DriverManager.getConnection(dbUrl, user, pass);
+            kalimat = koneksi.createStatement();
+            String delete = "DELETE FROM `buku` WHERE id_buku='" + id + "'";
+            kalimat.executeUpdate(delete);
+            loadData();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     }//GEN-LAST:event_btnhapusActionPerformed
 
     private void btnbatal1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnbatal1ActionPerformed
@@ -433,9 +517,10 @@ public class DataBukuView extends javax.swing.JPanel {
     }//GEN-LAST:event_btnbatal1ActionPerformed
 
     private void btnsimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsimpanActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here:    
     }//GEN-LAST:event_btnsimpanActionPerformed
 
+    
     private void btn_batalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_batalActionPerformed
        Main_Panel.removeAll();
        Main_Panel.add(Panel_buku);
@@ -473,6 +558,71 @@ public class DataBukuView extends javax.swing.JPanel {
         btn_tambah.setText("UBAH");
     }//GEN-LAST:event_tabel_databukuMousePressed
 
+    private void btnsimpanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnsimpanMouseClicked
+        // TODO add your handling code here:
+            int selectedRow = tabel_databuku.getSelectedRow();
+            String judul = txt_judulbuku.getText();
+            String pengarang = txt_pengarang.getText();
+            String penerbit = txt_penerbit.getText();
+            String tahunTerbit = txt_tahunterbit.getText();
+            String isbn = txt_isbn.getText();
+            int jumlahBuku = (int) jSpinner1.getValue();
+            String lokasi = (String) jComboBox1.getSelectedItem();
+            if(selectedRow >= 0){
+                try {
+                int selectedBookId = Integer.parseInt(tabel_databuku.getValueAt(selectedRow, 0).toString());
+                koneksi = DriverManager.getConnection(dbUrl, user, pass);
+                kalimat = koneksi.createStatement();
+                String sql = "UPDATE `buku` SET `judul`='" + judul + "', `pengarang`='" 
+                        + pengarang + "', `penerbit`='" + penerbit + "', `tahun_terbit`='" 
+                        + tahunTerbit + "', `ISBN`='" + isbn + "', `jumlah`='" + String.valueOf(jumlahBuku) 
+                        + "', `lokasi`='" + lokasi + "', `tanggal`='" + today 
+                        + "' WHERE `id_buku`='" + selectedBookId+"'";
+                kalimat.executeUpdate(sql);
+                // Refresh table
+                loadData();
+                Main_Panel.removeAll();
+                Main_Panel.add(Panel_buku);
+                Main_Panel.repaint();
+                Main_Panel.revalidate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }else{
+                try {
+                koneksi = DriverManager.getConnection(dbUrl, user, pass);
+                kalimat = koneksi.createStatement();
+                String insert = "INSERT INTO `buku` (judul, pengarang, penerbit, tahun_terbit, isbn, jumlah, lokasi, tanggal) VALUES ('" +
+                                judul + "','" + pengarang + "','" + penerbit + "','" + tahunTerbit + "','" + isbn + "'," + jumlahBuku + ",'" 
+                                + lokasi + "','" + today + "')";
+                kalimat.executeUpdate(insert);
+                loadData();
+                Main_Panel.removeAll();
+                Main_Panel.add(Panel_buku);
+                Main_Panel.repaint();
+                Main_Panel.revalidate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            }
+        
+    }//GEN-LAST:event_btnsimpanMouseClicked
+
+    private void txt_searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_searchActionPerformed
+        // TODO add your handling code here:
+        String search = txt_search.getText();
+        select = "SELECT * FROM `buku` where judul like '%"+search+"%'";
+        this.loadData();
+    }//GEN-LAST:event_txt_searchActionPerformed
+
+    public JTable getTabel_databuku() {
+        return tabel_databuku;
+    }
+
+    public void setTabel_databuku(JTable tabel_databuku) {
+        this.tabel_databuku = tabel_databuku;
+    }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Main_Panel;
@@ -502,7 +652,7 @@ public class DataBukuView extends javax.swing.JPanel {
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTable tabel_databuku;
+    public javax.swing.JTable tabel_databuku;
     private javax.swing.JTextField txt_isbn;
     private javax.swing.JTextField txt_judulbuku;
     private javax.swing.JTextField txt_penerbit;

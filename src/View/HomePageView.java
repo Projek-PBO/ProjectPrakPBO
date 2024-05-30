@@ -5,6 +5,7 @@
  */
 package View;
 
+import Controllers.HomePageController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -21,10 +22,12 @@ public class HomePageView extends javax.swing.JFrame {
     /**
      * Creates new form HomePageView
      */
-    public HomePageView() {
+    HomePageController controller;
+    public HomePageView(HomePageController hpc) {
+        controller = hpc;
         initComponents();
          this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-    
+        this.setVisible(true);
          execute();
     }
 
@@ -148,7 +151,7 @@ public class HomePageView extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new HomePageView().setVisible(true);
+//                new HomePageView().setVisible(true);
             }
         });
     }

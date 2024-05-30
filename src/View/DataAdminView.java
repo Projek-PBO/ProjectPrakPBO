@@ -5,6 +5,13 @@
  */
 package View;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author IDEAPAD GAMING
@@ -14,11 +21,40 @@ public class DataAdminView extends javax.swing.JPanel {
     /**
      * Creates new form DataBukuView
      */
+    Connection koneksi;
+    Statement kalimat;
+
+    private final String dbUrl = "jdbc:mysql://localhost/perpustakaan";
+    private final String user = "root";
+    private final String pass = "";
+    String select = "SELECT * FROM `admin`";
     public DataAdminView() {
         initComponents();
         btnhapus.setVisible(false);
         btnbatal.setVisible(false);
+        loadData();
     }
+    
+    public void loadData() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select);
+        DefaultTableModel model = (DefaultTableModel) tabel_databuku.getModel();
+        model.setRowCount(0);
+        while (resultSet.next()) {
+            model.addRow(new Object[]{
+                resultSet.getString("id_admin"),
+                resultSet.getString("nama"),
+                resultSet.getString("username"),
+                resultSet.getString("password"),
+                resultSet.getString("level"),
+            });
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -48,13 +84,13 @@ public class DataAdminView extends javax.swing.JPanel {
         jSeparator2 = new javax.swing.JSeparator();
         jPanel1 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        txt_judulbuku = new javax.swing.JTextField();
+        txt_nama = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        txt_pengarang = new javax.swing.JTextField();
-        txt_penerbit = new javax.swing.JTextField();
+        txt_username = new javax.swing.JTextField();
+        txt_password = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        CB_level = new javax.swing.JComboBox<>();
 
         setLayout(new java.awt.CardLayout());
 
@@ -134,6 +170,11 @@ public class DataAdminView extends javax.swing.JPanel {
         txt_search.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         txt_search.setText("Search");
         txt_search.setBorder(null);
+        txt_search.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_searchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout Panel_AdminLayout = new javax.swing.GroupLayout(Panel_Admin);
         Panel_Admin.setLayout(Panel_AdminLayout);
@@ -224,30 +265,30 @@ public class DataAdminView extends javax.swing.JPanel {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel3.setText("Nama Lengkap");
 
-        txt_judulbuku.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        txt_judulbuku.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
-        txt_judulbuku.addActionListener(new java.awt.event.ActionListener() {
+        txt_nama.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        txt_nama.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
+        txt_nama.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_judulbukuActionPerformed(evt);
+                txt_namaActionPerformed(evt);
             }
         });
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel4.setText("Username");
 
-        txt_pengarang.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        txt_pengarang.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102)));
-        txt_pengarang.addActionListener(new java.awt.event.ActionListener() {
+        txt_username.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        txt_username.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102)));
+        txt_username.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_pengarangActionPerformed(evt);
+                txt_usernameActionPerformed(evt);
             }
         });
 
-        txt_penerbit.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        txt_penerbit.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102)));
-        txt_penerbit.addActionListener(new java.awt.event.ActionListener() {
+        txt_password.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        txt_password.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102)));
+        txt_password.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_penerbitActionPerformed(evt);
+                txt_passwordActionPerformed(evt);
             }
         });
 
@@ -257,8 +298,8 @@ public class DataAdminView extends javax.swing.JPanel {
         jLabel6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel6.setText("Level");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---- Pilih Level Sebagai ----", "Admin", "Petugas" }));
-        jComboBox1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 51)));
+        CB_level.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---- Pilih Level Sebagai ----", "Admin", "Petugas" }));
+        CB_level.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 51)));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -273,10 +314,10 @@ public class DataAdminView extends javax.swing.JPanel {
                 .addGap(0, 492, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txt_judulbuku)
-                    .addComponent(txt_pengarang)
-                    .addComponent(txt_penerbit)
-                    .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txt_nama)
+                    .addComponent(txt_username)
+                    .addComponent(txt_password)
+                    .addComponent(CB_level, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -285,19 +326,19 @@ public class DataAdminView extends javax.swing.JPanel {
                 .addGap(12, 12, 12)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txt_judulbuku, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txt_nama, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txt_pengarang, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txt_username, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txt_penerbit, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(CB_level, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(32, Short.MAX_VALUE))
         );
 
@@ -345,6 +386,13 @@ public class DataAdminView extends javax.swing.JPanel {
        Main_Panel.removeAll();
        Main_Panel.repaint();
        Main_Panel.revalidate();
+       int selectedRow = tabel_databuku.getSelectedRow();
+        if (selectedRow >= 0) {
+        txt_nama.setText(tabel_databuku.getValueAt(selectedRow, 1).toString());
+        txt_username.setText(tabel_databuku.getValueAt(selectedRow, 2).toString());
+        txt_password.setText(tabel_databuku.getValueAt(selectedRow, 3).toString());
+        CB_level.setSelectedItem(tabel_databuku.getValueAt(selectedRow, 4).toString());
+        }
        
        Main_Panel.add(Tambah_Admin);
        Main_Panel.repaint();
@@ -353,6 +401,19 @@ public class DataAdminView extends javax.swing.JPanel {
 
     private void btnhapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnhapusActionPerformed
         // TODO add your handling code here:
+        int selectedRow = tabel_databuku.getSelectedRow();
+        if (selectedRow >= 0) {
+        String id = (String) tabel_databuku.getValueAt(selectedRow, 0); // Assuming ISBN is the unique identifier
+        try {
+            koneksi = DriverManager.getConnection(dbUrl, user, pass);
+            kalimat = koneksi.createStatement();
+            String delete = "DELETE FROM `admin` WHERE id_admin='" + id + "'";
+            kalimat.executeUpdate(delete);
+            loadData();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     }//GEN-LAST:event_btnhapusActionPerformed
 
     private void btnbatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnbatalActionPerformed
@@ -361,6 +422,45 @@ public class DataAdminView extends javax.swing.JPanel {
 
     private void btnsimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsimpanActionPerformed
         // TODO add your handling code here:
+            int selectedRow = tabel_databuku.getSelectedRow();
+            String nama = txt_nama.getText();
+            String username = txt_username.getText();
+            String password = txt_password.getText();
+            String level = (String) CB_level.getSelectedItem();
+            if(selectedRow >= 0){
+                try {
+                int selectedId = Integer.parseInt(tabel_databuku.getValueAt(selectedRow, 0).toString());
+                koneksi = DriverManager.getConnection(dbUrl, user, pass);
+                kalimat = koneksi.createStatement();
+                String sql = "UPDATE `admin` SET `nama`='" + nama + "', `username`='" 
+                        + username + "', `password`='" + password + "', `level`='" 
+                        + level +"' WHERE `id_admin`='" + selectedId+"'";
+                kalimat.executeUpdate(sql);
+                // Refresh table
+                loadData();
+                Main_Panel.removeAll();
+                Main_Panel.add(Panel_Admin);
+                Main_Panel.repaint();
+                Main_Panel.revalidate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            }else{
+                try {
+                koneksi = DriverManager.getConnection(dbUrl, user, pass);
+                kalimat = koneksi.createStatement();
+                String insert = "INSERT INTO `admin` (nama, username, password, level) VALUES ('" +
+                                nama + "','" + username + "','" + password + "','" + level + "')";
+                kalimat.executeUpdate(insert);
+                loadData();
+                Main_Panel.removeAll();
+                Main_Panel.add(Panel_Admin);
+                Main_Panel.repaint();
+                Main_Panel.revalidate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            }
     }//GEN-LAST:event_btnsimpanActionPerformed
 
     private void btn_batalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_batalActionPerformed
@@ -370,17 +470,17 @@ public class DataAdminView extends javax.swing.JPanel {
        Main_Panel.revalidate();
     }//GEN-LAST:event_btn_batalActionPerformed
 
-    private void txt_penerbitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_penerbitActionPerformed
+    private void txt_passwordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_passwordActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_penerbitActionPerformed
+    }//GEN-LAST:event_txt_passwordActionPerformed
 
-    private void txt_pengarangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_pengarangActionPerformed
+    private void txt_usernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_usernameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_pengarangActionPerformed
+    }//GEN-LAST:event_txt_usernameActionPerformed
 
-    private void txt_judulbukuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_judulbukuActionPerformed
+    private void txt_namaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_namaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_judulbukuActionPerformed
+    }//GEN-LAST:event_txt_namaActionPerformed
 
     private void tabel_databukuMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabel_databukuMousePressed
         btnhapus.setVisible(true);
@@ -388,8 +488,16 @@ public class DataAdminView extends javax.swing.JPanel {
         btn_tambah.setText("UBAH");
     }//GEN-LAST:event_tabel_databukuMousePressed
 
+    private void txt_searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_searchActionPerformed
+        // TODO add your handling code here:
+        String search = txt_search.getText();
+        select = "SELECT * FROM `admin` where nama like '%"+search+"%'";
+        this.loadData();
+    }//GEN-LAST:event_txt_searchActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> CB_level;
     private javax.swing.JPanel Main_Panel;
     private javax.swing.JPanel Panel_Admin;
     private javax.swing.JPanel Tambah_Admin;
@@ -398,7 +506,6 @@ public class DataAdminView extends javax.swing.JPanel {
     private javax.swing.JButton btnbatal;
     private javax.swing.JButton btnhapus;
     private javax.swing.JButton btnsimpan;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
@@ -412,9 +519,9 @@ public class DataAdminView extends javax.swing.JPanel {
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JTable tabel_databuku;
-    private javax.swing.JTextField txt_judulbuku;
-    private javax.swing.JTextField txt_penerbit;
-    private javax.swing.JTextField txt_pengarang;
+    private javax.swing.JTextField txt_nama;
+    private javax.swing.JTextField txt_password;
     private javax.swing.JTextField txt_search;
+    private javax.swing.JTextField txt_username;
     // End of variables declaration//GEN-END:variables
 }

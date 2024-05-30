@@ -5,6 +5,15 @@
  */
 package View;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author IDEAPAD GAMING
@@ -14,10 +23,61 @@ public class DataGantiRugiView extends javax.swing.JPanel {
     /**
      * Creates new form DataBukuView
      */
+    Connection koneksi;
+    Statement kalimat;
+
+    private final String dbUrl = "jdbc:mysql://localhost/perpustakaan";
+    private final String user = "root";
+    private final String pass = "";
+    String select = "SELECT * FROM `buku_dibayar`";
+    LocalDate today = LocalDate.now();
+    LocalDate pinjam = LocalDate.now();
+    LocalDate kembali = LocalDate.now();
+    
     public DataGantiRugiView() {
         initComponents();
+        loadData();
     }
 
+    public void loadData() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select);
+        DefaultTableModel model = (DefaultTableModel) tabel_databuku.getModel();
+        model.setRowCount(0);
+        while (resultSet.next()) {
+            LocalDate pinjam = LocalDate.now();
+            java.sql.Date sqlDateKembali = resultSet.getDate("tanggal_kembali");
+                
+            LocalDate tanggalKembali = sqlDateKembali != null ? sqlDateKembali.toLocalDate() : null;
+                
+                // Hitung keterlambatan
+            String terlambat = "Tidak terlambat";
+            if (tanggalKembali != null) {
+                long daysBetween = ChronoUnit.DAYS.between(pinjam, tanggalKembali);
+                long daysLate = ChronoUnit.DAYS.between(tanggalKembali, pinjam);
+                if (daysBetween < 0 ) {
+                    terlambat = "Terlambat " + (daysLate) + " hari";
+                }
+            }
+            model.addRow(new Object[]{
+                resultSet.getString("id"),
+                resultSet.getString("judul"),
+                resultSet.getString("nim"),
+                resultSet.getString("nama"),
+                resultSet.getString("tanggal_pinjam"),
+                resultSet.getString("tanggal_kembali"),
+                terlambat,
+                resultSet.getString("denda"),
+                resultSet.getString("ganti_rugi"),
+                resultSet.getString("total"),
+            });
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

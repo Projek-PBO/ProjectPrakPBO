@@ -5,7 +5,9 @@
  */
 package View;
 
+import Controllers.LoginAdminController;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -16,8 +18,11 @@ public class LoginAdminView extends javax.swing.JFrame {
     /**
      * Creates new form LoginAdminView
      */
-    public LoginAdminView() {
+    LoginAdminController controller;
+    public LoginAdminView(LoginAdminController lac) {
+        controller = lac;
         initComponents();
+        this.setVisible(true);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
@@ -32,9 +37,9 @@ public class LoginAdminView extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txt_passAdmin = new javax.swing.JTextField();
+        passTF = new javax.swing.JTextField();
         btn_loginAdmin = new javax.swing.JButton();
-        txt_usernameAdmin = new javax.swing.JTextField();
+        usernameTF = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
 
@@ -48,15 +53,15 @@ public class LoginAdminView extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Bibliophile-cuate 1.png"))); // NOI18N
 
-        txt_passAdmin.setFont(new java.awt.Font("Times New Roman", 0, 16)); // NOI18N
-        txt_passAdmin.setForeground(new java.awt.Color(0, 102, 0));
-        txt_passAdmin.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txt_passAdmin.setText("Password");
-        txt_passAdmin.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
-        txt_passAdmin.setPreferredSize(new java.awt.Dimension(73, 26));
-        txt_passAdmin.addActionListener(new java.awt.event.ActionListener() {
+        passTF.setFont(new java.awt.Font("Times New Roman", 0, 16)); // NOI18N
+        passTF.setForeground(new java.awt.Color(0, 102, 0));
+        passTF.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        passTF.setText("Password");
+        passTF.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
+        passTF.setPreferredSize(new java.awt.Dimension(73, 26));
+        passTF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_passAdminActionPerformed(evt);
+                passTFActionPerformed(evt);
             }
         });
 
@@ -65,15 +70,20 @@ public class LoginAdminView extends javax.swing.JFrame {
         btn_loginAdmin.setForeground(new java.awt.Color(255, 255, 255));
         btn_loginAdmin.setText("LOGIN");
         btn_loginAdmin.setBorder(null);
+        btn_loginAdmin.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btn_loginAdminMouseClicked(evt);
+            }
+        });
 
-        txt_usernameAdmin.setFont(new java.awt.Font("Times New Roman", 0, 16)); // NOI18N
-        txt_usernameAdmin.setForeground(new java.awt.Color(0, 102, 51));
-        txt_usernameAdmin.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txt_usernameAdmin.setText("Username");
-        txt_usernameAdmin.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
-        txt_usernameAdmin.addActionListener(new java.awt.event.ActionListener() {
+        usernameTF.setFont(new java.awt.Font("Times New Roman", 0, 16)); // NOI18N
+        usernameTF.setForeground(new java.awt.Color(0, 102, 51));
+        usernameTF.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        usernameTF.setText("Username");
+        usernameTF.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
+        usernameTF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_usernameAdminActionPerformed(evt);
+                usernameTFActionPerformed(evt);
             }
         });
 
@@ -93,10 +103,10 @@ public class LoginAdminView extends javax.swing.JFrame {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 668, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txt_usernameAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(usernameTF, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 492, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 644, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txt_passAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(passTF, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_loginAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -108,14 +118,14 @@ public class LoginAdminView extends javax.swing.JFrame {
                         .addGap(73, 73, 73)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 599, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(232, 232, 232)
+                        .addGap(212, 212, 212)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txt_usernameAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(usernameTF, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txt_passAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(passTF, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(btn_loginAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -127,13 +137,22 @@ public class LoginAdminView extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txt_passAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_passAdminActionPerformed
+    private void passTFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passTFActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_passAdminActionPerformed
+    }//GEN-LAST:event_passTFActionPerformed
 
-    private void txt_usernameAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_usernameAdminActionPerformed
+    private void usernameTFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usernameTFActionPerformed
         
-    }//GEN-LAST:event_txt_usernameAdminActionPerformed
+    }//GEN-LAST:event_usernameTFActionPerformed
+
+    private void btn_loginAdminMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_loginAdminMouseClicked
+        // TODO add your handling code here:
+        if(usernameTF.getText().equals("") || passTF.getText().equals("")){
+            JOptionPane.showMessageDialog(null, "Form Tidak Boleh Kosong");
+        }else{
+            controller.userLogin(usernameTF.getText(),passTF.getText());
+        }
+    }//GEN-LAST:event_btn_loginAdminMouseClicked
 
     /**
      * @param args the command line arguments
@@ -165,7 +184,7 @@ public class LoginAdminView extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new LoginAdminView().setVisible(true);
+//                new LoginAdminView().setVisible(true);
             }
         });
     }
@@ -176,7 +195,7 @@ public class LoginAdminView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField txt_passAdmin;
-    private javax.swing.JTextField txt_usernameAdmin;
+    private javax.swing.JTextField passTF;
+    private javax.swing.JTextField usernameTF;
     // End of variables declaration//GEN-END:variables
 }

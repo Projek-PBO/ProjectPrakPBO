@@ -5,6 +5,7 @@
  */
 package View;
 
+import Controllers.LoginAnggotaController;
 import javax.swing.JFrame;
 
 /**
@@ -16,8 +17,11 @@ public class LoginAnggotaView extends javax.swing.JFrame {
     /**
      * Creates new form LoginAnggotaView
      */
-    public LoginAnggotaView() {
+    LoginAnggotaController controller;
+    public LoginAnggotaView(LoginAnggotaController lac) {
+        controller = lac;
         initComponents();
+        this.setVisible(true);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         
     }
@@ -194,7 +198,7 @@ public class LoginAnggotaView extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new LoginAnggotaView().setVisible(true);
+//                new LoginAnggotaView().setVisible(true);
             }
         });
     }

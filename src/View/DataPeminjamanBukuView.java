@@ -5,6 +5,15 @@
  */
 package View;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author IDEAPAD GAMING
@@ -14,12 +23,95 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
     /**
      * Creates new form DataBukuView
      */
+    Connection koneksi;
+    Statement kalimat;
+
+    private final String dbUrl = "jdbc:mysql://localhost/perpustakaan";
+    private final String user = "root";
+    private final String pass = "";
+    String select1 = "SELECT * FROM `buku`";
+    String select2 = "SELECT * FROM `anggota`";
+    String select = "SELECT * FROM `peminjaman`";
+    LocalDate today = LocalDate.now();
+    LocalDate pinjam = LocalDate.now();
+    LocalDate kembali = LocalDate.now();
+    
     public DataPeminjamanBukuView() {
         initComponents();
-        btnGantiRugi.setVisible(false);
+        btnBukuKembali.setVisible(false);
         btnhilang.setVisible(false);
+        loadData();
+        loadDataBuku();
+        loadDataAnggota();
     }
+    
+    public void loadData() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select);
+        DefaultTableModel model = (DefaultTableModel) tabel_databuku.getModel();
+        model.setRowCount(0);
+        while (resultSet.next()) {
+            LocalDate pinjam = LocalDate.now();
+            java.sql.Date sqlDateKembali = resultSet.getDate("tanggal_kembali");
+                
+            LocalDate tanggalKembali = sqlDateKembali != null ? sqlDateKembali.toLocalDate() : null;
+                
+                // Hitung keterlambatan
+            String terlambat = "Tidak terlambat";
+            if (tanggalKembali != null) {
+                long daysBetween = ChronoUnit.DAYS.between(pinjam, tanggalKembali);
+                long daysLate = ChronoUnit.DAYS.between(tanggalKembali, pinjam);
+                if (daysBetween < 0 ) {
+                    terlambat = "Terlambat " + (daysLate) + " hari";
+                }
+            }
+            model.addRow(new Object[]{
+                resultSet.getString("id_peminjaman"),
+                resultSet.getString("judul"),
+                resultSet.getString("nim"),
+                resultSet.getString("nama"),
+                resultSet.getString("tanggal_pinjam"),
+                resultSet.getString("tanggal_kembali"),
+                terlambat,
+                resultSet.getString("status"),
+            });
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 
+    public void loadDataBuku() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select1);
+        while (resultSet.next()) {
+                jComboBox2.addItem(resultSet.getString("judul"));
+            }
+        }
+     catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+    
+    public void loadDataAnggota() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select2);
+        CB_nama.removeAllItems();
+        while (resultSet.next()) {
+                jComboBox3.addItem(resultSet.getString("nama"));
+            }
+        }
+     catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -36,7 +128,7 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         btn_tambah = new javax.swing.JButton();
         btnhilang = new javax.swing.JButton();
-        btnGantiRugi = new javax.swing.JButton();
+        btnBukuKembali = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel12 = new javax.swing.JLabel();
         jSeparator3 = new javax.swing.JSeparator();
@@ -49,10 +141,8 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        txt_penerbit = new javax.swing.JTextField();
+        txt_lama = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        txt_tahunterbit = new javax.swing.JTextField();
         jComboBox2 = new javax.swing.JComboBox<>();
         jComboBox3 = new javax.swing.JComboBox<>();
         Buku_Hilang = new javax.swing.JPanel();
@@ -65,8 +155,8 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
         jLabel9 = new javax.swing.JLabel();
         txt_penerbit1 = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
-        jComboBox4 = new javax.swing.JComboBox<>();
-        jComboBox5 = new javax.swing.JComboBox<>();
+        CB_buku = new javax.swing.JComboBox<>();
+        CB_nama = new javax.swing.JComboBox<>();
 
         setLayout(new java.awt.CardLayout());
 
@@ -123,15 +213,15 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
             }
         });
 
-        btnGantiRugi.setBackground(new java.awt.Color(0, 102, 51));
-        btnGantiRugi.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
-        btnGantiRugi.setForeground(new java.awt.Color(255, 255, 255));
-        btnGantiRugi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/batal.png"))); // NOI18N
-        btnGantiRugi.setText("GANTI RUGI");
-        btnGantiRugi.setBorder(null);
-        btnGantiRugi.addActionListener(new java.awt.event.ActionListener() {
+        btnBukuKembali.setBackground(new java.awt.Color(0, 102, 51));
+        btnBukuKembali.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
+        btnBukuKembali.setForeground(new java.awt.Color(255, 255, 255));
+        btnBukuKembali.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/batal.png"))); // NOI18N
+        btnBukuKembali.setText("BUKU KEMBALI");
+        btnBukuKembali.setBorder(null);
+        btnBukuKembali.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnGantiRugiActionPerformed(evt);
+                btnBukuKembaliActionPerformed(evt);
             }
         });
 
@@ -146,6 +236,11 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
         txt_search.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         txt_search.setText("Search");
         txt_search.setBorder(null);
+        txt_search.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_searchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout Panel_bukuLayout = new javax.swing.GroupLayout(Panel_buku);
         Panel_buku.setLayout(Panel_bukuLayout);
@@ -164,7 +259,7 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnhilang, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnGantiRugi, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnBukuKembali, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 41, Short.MAX_VALUE)
                         .addGroup(Panel_bukuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, Panel_bukuLayout.createSequentialGroup()
@@ -190,10 +285,10 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
                         .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(Panel_bukuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnhilang, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnGantiRugi, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnBukuKembali, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txt_search, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 577, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -239,27 +334,16 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel4.setText("Nama Peminjam");
 
-        txt_penerbit.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        txt_penerbit.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102)));
-        txt_penerbit.addActionListener(new java.awt.event.ActionListener() {
+        txt_lama.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        txt_lama.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102)));
+        txt_lama.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_penerbitActionPerformed(evt);
+                txt_lamaActionPerformed(evt);
             }
         });
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel5.setText("Tanggal Pinjam");
-
-        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel6.setText("Tanggal Kembali");
-
-        txt_tahunterbit.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        txt_tahunterbit.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102)));
-        txt_tahunterbit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_tahunterbitActionPerformed(evt);
-            }
-        });
+        jLabel5.setText("Pinjam Berapa Hari");
 
         jComboBox2.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---- Pilih Judul Buku ----" }));
@@ -277,14 +361,12 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 528, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jComboBox2, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txt_penerbit, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txt_tahunterbit, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txt_lama, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jComboBox3, javax.swing.GroupLayout.Alignment.LEADING, 0, 660, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -302,12 +384,8 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txt_penerbit, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txt_tahunterbit, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(51, Short.MAX_VALUE))
+                .addComponent(txt_lama, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(124, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout Tambah_bukuLayout = new javax.swing.GroupLayout(Tambah_buku);
@@ -398,13 +476,13 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
         jLabel10.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel10.setText("Besaran Ganti Rugi");
 
-        jComboBox4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---- Pilih Judul Buku ----" }));
-        jComboBox4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
+        CB_buku.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        CB_buku.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---- Pilih Judul Buku ----" }));
+        CB_buku.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
 
-        jComboBox5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jComboBox5.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---- Pilih Nama Peminjam ----" }));
-        jComboBox5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
+        CB_nama.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        CB_nama.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---- Pilih Nama Peminjam ----" }));
+        CB_nama.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 51)));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -418,9 +496,9 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
                 .addGap(0, 557, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jComboBox4, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(CB_buku, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txt_penerbit1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jComboBox5, javax.swing.GroupLayout.Alignment.LEADING, 0, 660, Short.MAX_VALUE))
+                    .addComponent(CB_nama, javax.swing.GroupLayout.Alignment.LEADING, 0, 660, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -429,11 +507,11 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
                 .addGap(12, 12, 12)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(CB_buku, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(CB_nama, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -493,17 +571,74 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
 
     private void btnhilangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnhilangActionPerformed
         // TODO add your handling code here:
+        try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        int selectedRow = tabel_databuku.getSelectedRow();
+        if (selectedRow >= 0) {
+        String id = tabel_databuku.getValueAt(selectedRow, 0).toString();
+        ResultSet resultSet = kalimat.executeQuery("Select * from peminjaman where id_peminjaman = '"+id+"'");
+        while (resultSet.next()) {
+                String judul = resultSet.getString("judul");
+                String nim = resultSet.getString("nim");
+                String nama = resultSet.getString("nama");
+                String tanggal_pinjam = resultSet.getString("tanggal_pinjam");
+                String tanggal_kembali = resultSet.getString("tanggal_kembali");
+                String terlambat = resultSet.getString("terlambat");
+                kalimat = koneksi.createStatement();
+                String insert = "INSERT INTO `buku_hilang` ( judul,nim, nama, tanggal_pinjam, tanggal_kembali, terlambat,"
+                        + " status, ganti_rugi) VALUES ('"+judul + "','" +nim+ "','" +nama+ "','" + tanggal_pinjam + "','" 
+                        + tanggal_kembali + "','" + terlambat + "','" + "Hilang" + "','"+100000+"')";
+                kalimat.executeUpdate(insert);
+            }
+        kalimat = koneksi.createStatement();
+        String delete = "DELETE FROM `peminjaman` WHERE id_peminjaman='" + id + "'";
+        kalimat.executeUpdate(delete);
+        loadData();
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
     }//GEN-LAST:event_btnhilangActionPerformed
-
-    private void btnGantiRugiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGantiRugiActionPerformed
-       Main_Panel.removeAll();
-       Main_Panel.add(Buku_Hilang);
-       Main_Panel.repaint();
-       Main_Panel.revalidate();
-    }//GEN-LAST:event_btnGantiRugiActionPerformed
 
     private void btnsimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsimpanActionPerformed
         // TODO add your handling code here:
+        String judul = (String) jComboBox2.getSelectedItem();
+        String nama = (String) jComboBox3.getSelectedItem();
+        int terlambat = Integer.parseInt(this.txt_lama.getText());
+        LocalDate kembali = today.plusDays(Integer.parseInt(txt_lama.getText()));
+        String nim = null;
+        try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery("select * from `anggota` where nama = '"+nama+"'");
+        while (resultSet.next()) {
+            nim = resultSet.getString("nim");
+        }
+        String insert = "INSERT INTO `peminjaman` (judul, nim, nama, tanggal_pinjam, tanggal_kembali, terlambat,"
+                        + " status) VALUES ('"+judul + "','" + nim + "','" + nama + "','" + today + "','" 
+                        + kembali + "','" + terlambat + "','" + "Dipinjam" + "')";
+        kalimat.executeUpdate(insert);
+        kalimat = koneksi.createStatement();
+        String ambilJumlah = "Select * from `buku` where judul = '"+judul+"'";
+        resultSet = kalimat.executeQuery(ambilJumlah);
+        while (resultSet.next()) {
+            int jumlah = Integer.parseInt(resultSet.getString("jumlah"));
+            jumlah--;
+            kalimat = koneksi.createStatement();
+            String sql = "UPDATE `buku` SET `jumlah` = '"+jumlah+"' where judul = '"+judul+"'";
+            kalimat.executeUpdate(sql);
+        }
+        loadData();
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        Main_Panel.removeAll();
+        Main_Panel.add(Panel_buku);
+        Main_Panel.repaint();
+        Main_Panel.revalidate();   
+        
+
     }//GEN-LAST:event_btnsimpanActionPerformed
 
     private void btn_batalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_batalActionPerformed
@@ -513,13 +648,9 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
        Main_Panel.revalidate();
     }//GEN-LAST:event_btn_batalActionPerformed
 
-    private void txt_tahunterbitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_tahunterbitActionPerformed
+    private void txt_lamaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_lamaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_tahunterbitActionPerformed
-
-    private void txt_penerbitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_penerbitActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txt_penerbitActionPerformed
+    }//GEN-LAST:event_txt_lamaActionPerformed
 
     private void btnsimpan1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsimpan1ActionPerformed
         // TODO add your handling code here:
@@ -537,18 +668,62 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
     }//GEN-LAST:event_txt_penerbit1ActionPerformed
 
     private void tabel_databukuMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabel_databukuMousePressed
-        btnGantiRugi.setVisible(true);
+        btnBukuKembali.setVisible(true);
         btnhilang.setVisible(true);
         btn_tambah.setText("KEMBALI");
     }//GEN-LAST:event_tabel_databukuMousePressed
 
+    private void btnBukuKembaliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBukuKembaliActionPerformed
+        try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        int selectedRow = tabel_databuku.getSelectedRow();
+        if (selectedRow >= 0) {
+        String id = tabel_databuku.getValueAt(selectedRow, 0).toString();
+        ResultSet resultSet = kalimat.executeQuery("Select * from peminjaman where id_peminjaman = '"+id+"'");
+        while (resultSet.next()) {
+                String judul = resultSet.getString("judul");
+                String nim = resultSet.getString("nim");
+                String nama = resultSet.getString("nama");
+                String tanggal_pinjam = resultSet.getString("tanggal_pinjam");
+                String tanggal_kembali = resultSet.getString("tanggal_kembali");
+                String terlambat = resultSet.getString("terlambat");
+                kalimat = koneksi.createStatement();
+                String insert = "INSERT INTO `buku_kembali` ( judul,nim, nama, tanggal_pinjam, tanggal_kembali, terlambat,"
+                        + " status) VALUES ('"+judul + "','" + nim + "','" + nama + "','" + tanggal_pinjam + "','" 
+                        + tanggal_kembali + "','" + terlambat + "','" + "Dikembalikan" + "')";
+                kalimat.executeUpdate(insert);
+            }
+        kalimat = koneksi.createStatement();
+        String delete = "DELETE FROM `peminjaman` WHERE id_peminjaman='" + id + "'";
+        kalimat.executeUpdate(delete);
+        loadData();
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+        Main_Panel.removeAll();
+        Main_Panel.add(Panel_buku);
+        Main_Panel.repaint();
+        Main_Panel.revalidate();
+    }//GEN-LAST:event_btnBukuKembaliActionPerformed
+
+    private void txt_searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_searchActionPerformed
+        // TODO add your handling code here:
+        String search = txt_search.getText();
+        select = "SELECT * FROM `peminjaman` where judul like '%"+search+"%'";
+        this.loadData();
+    }//GEN-LAST:event_txt_searchActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Buku_Hilang;
+    private javax.swing.JComboBox<String> CB_buku;
+    private javax.swing.JComboBox<String> CB_nama;
     private javax.swing.JPanel Main_Panel;
     private javax.swing.JPanel Panel_buku;
     private javax.swing.JPanel Tambah_buku;
-    private javax.swing.JButton btnGantiRugi;
+    private javax.swing.JButton btnBukuKembali;
     private javax.swing.JButton btn_batal;
     private javax.swing.JButton btn_batal1;
     private javax.swing.JButton btn_tambah;
@@ -557,8 +732,6 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
     private javax.swing.JButton btnsimpan1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
-    private javax.swing.JComboBox<String> jComboBox4;
-    private javax.swing.JComboBox<String> jComboBox5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
@@ -566,7 +739,6 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -578,9 +750,8 @@ public class DataPeminjamanBukuView extends javax.swing.JPanel {
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JTable tabel_databuku;
-    private javax.swing.JTextField txt_penerbit;
+    private javax.swing.JTextField txt_lama;
     private javax.swing.JTextField txt_penerbit1;
     private javax.swing.JTextField txt_search;
-    private javax.swing.JTextField txt_tahunterbit;
     // End of variables declaration//GEN-END:variables
 }

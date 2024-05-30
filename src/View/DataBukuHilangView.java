@@ -5,6 +5,15 @@
  */
 package View;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author IDEAPAD GAMING
@@ -14,10 +23,61 @@ public class DataBukuHilangView extends javax.swing.JPanel {
     /**
      * Creates new form DataBukuView
      */
+    Connection koneksi;
+    Statement kalimat;
+
+    private final String dbUrl = "jdbc:mysql://localhost/perpustakaan";
+    private final String user = "root";
+    private final String pass = "";
+    String select = "SELECT * FROM `buku_hilang`";
+    LocalDate today = LocalDate.now();
+    LocalDate pinjam = LocalDate.now();
+    LocalDate kembali = LocalDate.now();
+    
     public DataBukuHilangView() {
         initComponents();
         btnbayar.setVisible(false);
+        loadData();
     }
+    
+    public void loadData() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select);
+        DefaultTableModel model = (DefaultTableModel) tabel_databuku.getModel();
+        model.setRowCount(0);
+        while (resultSet.next()) {
+            LocalDate pinjam = LocalDate.now();
+            java.sql.Date sqlDateKembali = resultSet.getDate("tanggal_kembali");
+                
+            LocalDate tanggalKembali = sqlDateKembali != null ? sqlDateKembali.toLocalDate() : null;
+                
+                // Hitung keterlambatan
+            String terlambat = "Tidak terlambat";
+            if (tanggalKembali != null) {
+                long daysBetween = ChronoUnit.DAYS.between(pinjam, tanggalKembali);
+                long daysLate = ChronoUnit.DAYS.between(tanggalKembali, pinjam);
+                if (daysBetween < 0 ) {
+                    terlambat = "Terlambat " + (daysLate) + " hari";
+                }
+            }
+            model.addRow(new Object[]{
+                resultSet.getString("id"),
+                resultSet.getString("judul"),
+                resultSet.getString("nim"),
+                resultSet.getString("nama"),
+                resultSet.getString("tanggal_pinjam"),
+                resultSet.getString("tanggal_kembali"),
+                terlambat,
+                resultSet.getString("status"),
+                resultSet.getString("ganti_rugi"),
+            });
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -59,6 +119,11 @@ public class DataBukuHilangView extends javax.swing.JPanel {
         txt_search.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         txt_search.setText("Search");
         txt_search.setBorder(null);
+        txt_search.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_searchActionPerformed(evt);
+            }
+        });
 
         tabel_databuku.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -148,8 +213,43 @@ public class DataBukuHilangView extends javax.swing.JPanel {
     }//GEN-LAST:event_tabel_databukuMousePressed
 
     private void btnbayarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnbayarActionPerformed
-        
+        try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        int selectedRow = tabel_databuku.getSelectedRow();
+        if (selectedRow >= 0) {
+        String id = tabel_databuku.getValueAt(selectedRow, 0).toString();
+        ResultSet resultSet = kalimat.executeQuery("Select * from buku_hilang where id = '"+id+"'");
+        while (resultSet.next()) {
+                String judul = resultSet.getString("judul");
+                String nim = resultSet.getString("nim");
+                String nama = resultSet.getString("nama");
+                String tanggal_pinjam = resultSet.getString("tanggal_pinjam");
+                String tanggal_kembali = resultSet.getString("tanggal_kembali");
+                String terlambat = resultSet.getString("terlambat");
+                String ganti_rugi = resultSet.getString("ganti_rugi");
+                kalimat = koneksi.createStatement();
+                String insert = "INSERT INTO `buku_dibayar` ( judul,nim, nama, tanggal_pinjam, tanggal_kembali, terlambat,"
+                        + " denda,ganti_rugi,total) VALUES ('"+judul + "','" + nim + "','" + nama + "','" + tanggal_pinjam + "','" 
+                        + tanggal_kembali + "','" + terlambat + "','" + " - " + "','" + ganti_rugi + "','" + ganti_rugi + "')";
+                kalimat.executeUpdate(insert);
+            }
+        kalimat = koneksi.createStatement();
+        String delete = "DELETE FROM `buku_hilang` WHERE id='" + id + "'";
+        kalimat.executeUpdate(delete);
+        loadData();
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
     }//GEN-LAST:event_btnbayarActionPerformed
+
+    private void txt_searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_searchActionPerformed
+        // TODO add your handling code here:
+        String search = txt_search.getText();
+        select = "SELECT * FROM `buku_hilang` where judul like '%"+search+"%'";
+        this.loadData();
+    }//GEN-LAST:event_txt_searchActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -5,6 +5,13 @@
  */
 package View;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author IDEAPAD GAMING
@@ -14,9 +21,40 @@ public class LaporanDataAnggotaView extends javax.swing.JPanel {
     /**
      * Creates new form DataBukuView
      */
+    Connection koneksi;
+    Statement kalimat;
+
+    private final String dbUrl = "jdbc:mysql://localhost/perpustakaan";
+    private final String user = "root";
+    private final String pass = "";
+    String select = "SELECT * FROM `anggota`";
     public LaporanDataAnggotaView() {
         initComponents();
+        loadData();
     }
+    
+    public void loadData() {
+    try {
+        koneksi = DriverManager.getConnection(dbUrl, user, pass);
+        kalimat = koneksi.createStatement();
+        ResultSet resultSet = kalimat.executeQuery(select);
+        DefaultTableModel model = (DefaultTableModel) tabel_databuku.getModel();
+        model.setRowCount(0);
+        while (resultSet.next()) {
+            model.addRow(new Object[]{
+                resultSet.getString("id_anggota"),
+                resultSet.getString("nama"),
+                resultSet.getString("nim"),
+                resultSet.getString("fakultas"),
+                resultSet.getString("jurusan"),
+                resultSet.getString("jenis_kelamin"),
+                resultSet.getString("ttl")
+            });
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -74,6 +112,11 @@ public class LaporanDataAnggotaView extends javax.swing.JPanel {
         txt_search.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         txt_search.setText("Search");
         txt_search.setBorder(null);
+        txt_search.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_searchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout Panel_bukuhilangLayout = new javax.swing.GroupLayout(Panel_bukuhilang);
         Panel_bukuhilang.setLayout(Panel_bukuhilangLayout);
@@ -120,6 +163,13 @@ public class LaporanDataAnggotaView extends javax.swing.JPanel {
 
         add(Main_Panel, "card2");
     }// </editor-fold>//GEN-END:initComponents
+
+    private void txt_searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_searchActionPerformed
+        // TODO add your handling code here:
+        String search = txt_search.getText();
+        select = "SELECT * FROM `anggota` where nama like '%"+search+"%'";
+        this.loadData();
+    }//GEN-LAST:event_txt_searchActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
